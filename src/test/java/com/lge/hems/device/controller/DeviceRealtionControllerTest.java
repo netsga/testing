@@ -1,6 +1,6 @@
 package com.lge.hems.device.controller;
 
-import com.lge.hems.device.HemsDeviceManagerApplication;
+import com.lge.hems.HemsPlatformApplication;
 import com.lge.hems.device.model.common.entity.ChildDeviceInformation;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
  * Created by netsga on 2016. 5. 24..
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(HemsDeviceManagerApplication.class)
+@SpringApplicationConfiguration(HemsPlatformApplication.class)
 public class DeviceRealtionControllerTest {
     @Autowired
     private DeviceRelationController controller;

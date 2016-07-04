@@ -1,7 +1,7 @@
 package com.lge.hems.device.service.devicemodel;
 
 import com.google.gson.JsonObject;
-import com.lge.hems.device.HemsDeviceManagerApplication;
+import com.lge.hems.HemsPlatformApplication;
 import com.lge.hems.device.exceptions.NullRequestException;
 import com.lge.hems.device.model.common.DeviceModelInformation;
 import com.lge.hems.device.service.core.devicemodel.DeviceModelService;
@@ -23,7 +23,7 @@ import static org.junit.Assert.*;
  * Created by netsga on 2016. 6. 8..
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(HemsDeviceManagerApplication.class)
+@SpringApplicationConfiguration(HemsPlatformApplication.class)
 public class DeviceModelServiceTest {
 
     @Autowired

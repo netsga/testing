@@ -1,9 +1,10 @@
 package com.lge.hems.device.service.devicerelation;
 
-import com.lge.hems.device.HemsDeviceManagerApplication;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.lge.hems.HemsPlatformApplication;
 
 import static org.mockito.Mockito.mock;
 
@@ -11,7 +12,7 @@ import static org.mockito.Mockito.mock;
  * Created by netsga on 2016. 5. 24..
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(HemsDeviceManagerApplication.class)
+@SpringApplicationConfiguration(HemsPlatformApplication.class)
 public class ProtoDeviceInstanceServiceRelationServiceTest {
 //    @Autowired
 //    DeviceRelationService service;
