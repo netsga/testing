@@ -1,6 +1,6 @@
 package com.lge.hems.device.controller;
 
-import com.lge.hems.device.HemsDeviceManagerApplication;
+import com.lge.hems.HemsPlatformApplication;
 import com.lge.hems.device.exceptions.RequestParameterException;
 import com.lge.hems.device.exceptions.deviceinstance.DuplicateDeviceException;
 import com.lge.hems.device.model.common.DeviceDataTagValue;
@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
  * Created by netsga on 2016. 5. 26..
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(HemsDeviceManagerApplication.class)
+@SpringApplicationConfiguration(HemsPlatformApplication.class)
 public class DeviceDataControllerTest {
     @Autowired
     private JsonConverter jsonConv;

@@ -1,10 +1,10 @@
 package com.lge.hems.device.service.verification;
 
-import com.lge.hems.device.HemsDeviceManagerApplication;
 import com.lge.hems.device.service.core.verification.ParameterVerification;
 import com.lge.hems.device.service.core.verification.VerificationErrorCode;
 import com.lge.hems.device.service.core.verification.VerificationService;
 import com.lge.hems.device.service.dao.rds.ParameterRestrictionRepository;
+import com.lge.hems.HemsPlatformApplication;
 import com.lge.hems.device.exceptions.RequestParameterException;
 import com.lge.hems.device.model.common.entity.ParameterRestriction;
 import com.lge.hems.device.utilities.CollectionFactory;
@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
  * Created by netsga on 2016. 5. 27..
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(HemsDeviceManagerApplication.class)
+@SpringApplicationConfiguration(HemsPlatformApplication.class)
 public class VerificationServiceTest {
     @LoggerImpl
     private Logger logger;

@@ -2,7 +2,7 @@ package com.lge.hems.device.service.dao.cache;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.lge.hems.device.HemsDeviceManagerApplication;
+import com.lge.hems.HemsPlatformApplication;
 import com.lge.hems.device.exceptions.deviceinstance.DuplicateDeviceException;
 import com.lge.hems.device.model.common.DeviceModelInformation;
 import com.lge.hems.device.model.common.entity.DeviceInstanceInformation;
@@ -23,7 +23,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(HemsDeviceManagerApplication.class)
+@SpringApplicationConfiguration(HemsPlatformApplication.class)
 public class RedisRepositoryTest {
     @Autowired
     @Qualifier("redisRepository")

@@ -2,7 +2,7 @@ package com.lge.hems.device.service.core.deviceinstance;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.lge.hems.device.HemsDeviceManagerApplication;
+import com.lge.hems.HemsPlatformApplication;
 import com.lge.hems.device.exceptions.ModelReadFailException;
 import com.lge.hems.device.exceptions.NullModelException;
 import com.lge.hems.device.exceptions.NullRequestException;
@@ -28,7 +28,7 @@ import static org.junit.Assert.assertEquals;
  * Created by netsga on 2016. 6. 22..
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(HemsDeviceManagerApplication.class)
+@SpringApplicationConfiguration(HemsPlatformApplication.class)
 public class DeviceInstanceDataServiceTest {
     private static final String userId = "instanceService-user";
     private static final String preLdid = "instanceService-ldid";

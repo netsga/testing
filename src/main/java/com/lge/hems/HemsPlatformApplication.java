@@ -1,4 +1,4 @@
-package com.lge.hems.device;
+package com.lge.hems;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -10,9 +10,9 @@ import org.springframework.context.annotation.PropertySource;
 @SpringBootApplication
 @EnableAutoConfiguration
 @PropertySource("config.properties")
-public class HemsDeviceManagerApplication {
+public class HemsPlatformApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(HemsDeviceManagerApplication.class, args);
+		SpringApplication.run(HemsPlatformApplication.class, args);
 	}
 }
