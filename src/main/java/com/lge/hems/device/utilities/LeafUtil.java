@@ -21,12 +21,14 @@ public class LeafUtil {
 
     public static Map<String, String> leafInfoExtractor(String str) {
         Map<String, String> result = CollectionFactory.newMap();
-        Matcher match = leafPattern.matcher(str);
-
-        if(match.find()) {
-            result.put(TYPE, match.group(1));
-            result.put(METHOD, match.group(2));
-            result.put(PARAMETERS, match.group(3));
+        if(str != null && !str.isEmpty()) {
+	        Matcher match = leafPattern.matcher(str);
+	
+	        if(match.find()) {
+	            result.put(TYPE, match.group(1));
+	            result.put(METHOD, match.group(2));
+	            result.put(PARAMETERS, match.group(3));
+	        }
         }
         return result;
     }

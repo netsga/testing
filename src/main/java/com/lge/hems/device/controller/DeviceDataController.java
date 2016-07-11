@@ -1,38 +1,39 @@
 package com.lge.hems.device.controller;
 
-import com.google.gson.JsonObject;
-import com.lge.hems.device.exceptions.DeviceControlRequestException;
-import com.lge.hems.device.exceptions.deviceinstance.DeviceInstanceDataReadException;
-import com.lge.hems.device.exceptions.UserDeviceMultipleBindingException;
-import com.lge.hems.device.exceptions.deviceinstance.DeviceInstanceDataUpdateException;
-import com.lge.hems.device.exceptions.deviceinstance.NotRegisteredDeviceException;
-import com.lge.hems.device.exceptions.deviceinstance.NullInstanceException;
-import com.lge.hems.device.model.common.InternalCommonKey;
-import com.lge.hems.device.service.core.deviceinstance.DeviceInstanceDataService;
-import com.lge.hems.device.service.core.devicerelation.UserDeviceRelationService;
-import com.lge.hems.device.service.core.verification.ParameterName;
-import com.lge.hems.device.utilities.customize.JsonConverter;
-import com.lge.hems.device.exceptions.RequestParameterException;
-import com.lge.hems.device.model.common.DeviceDataTagValue;
-import com.lge.hems.device.model.common.ResultCode;
-import com.lge.hems.device.model.controller.request.DeviceControlRequest;
-import com.lge.hems.device.model.controller.request.DeviceDataUpdateRequest;
-import com.lge.hems.device.model.controller.response.BaseResponse;
-import com.lge.hems.device.service.core.deviceinstance.DeviceInstanceService;
-import com.lge.hems.device.service.core.verification.VerificationErrorCode;
-import com.lge.hems.device.service.core.verification.VerificationService;
-import com.lge.hems.device.utilities.CollectionFactory;
-import com.lge.hems.device.utilities.logger.LoggerImpl;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.Parameter;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import com.google.gson.JsonObject;
+import com.lge.hems.device.exceptions.DeviceControlRequestException;
+import com.lge.hems.device.exceptions.deviceinstance.NotRegisteredDeviceException;
+import com.lge.hems.device.model.common.InternalCommonKey;
+import com.lge.hems.device.model.common.ResultCode;
+import com.lge.hems.device.model.controller.request.DeviceControlRequest;
+import com.lge.hems.device.model.controller.request.DeviceDataUpdateRequest;
+import com.lge.hems.device.model.controller.response.BaseResponse;
+import com.lge.hems.device.service.core.deviceinstance.DeviceInstanceDataService;
+import com.lge.hems.device.service.core.devicerelation.UserDeviceRelationService;
+import com.lge.hems.device.service.core.verification.ParameterName;
+import com.lge.hems.device.service.core.verification.VerificationService;
+import com.lge.hems.device.utilities.CollectionFactory;
+import com.lge.hems.device.utilities.logger.LoggerImpl;
 
 /**
  * Created by netsga on 2016. 5. 24..
@@ -111,6 +112,54 @@ public class DeviceDataController {
         }
 
         JsonObject resultContent = dataService.getDeviceInstanceData(logicalDeviceId, tagList, reqInfo);
+
+        base.setResult(resultContent);
+        base.setResultCode(ResultCode.SUCCESS.getResultCode());
+
+        return base;
+    }
+    
+    /**
+     * Timeseries data를 받아오기 위한 것으로 url, query string, 응답 데이터의 형식만 다르고 나머지는 동일하다.
+     * 
+     * @param logicalDeviceId
+     * @param tags
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/{logicalDeviceId}/history", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
+    public BaseResponse getDeviceHistoryData(@PathVariable String logicalDeviceId, @RequestParam(value = "tags") String tags, 
+    		@RequestParam("from") Long from, @RequestParam("to") Long to, 
+    		@RequestParam(value = "method", required = false) String method, @RequestParam(value = "aggregate", required = false) String aggregate) throws Exception {
+        return getDeviceHistoryData(logicalDeviceId, tags, from, to, method, aggregate, null);
+    }
+    public BaseResponse getDeviceHistoryData(String logicalDeviceId, String tags, Long from, Long to, String method, String aggregate, Boolean testFlag) throws Exception {
+        BaseResponse base = new BaseResponse();
+        Map<String, String> reqInfo = CollectionFactory.newMap();
+
+        byte[] decoded = Base64.decodeBase64(tags.getBytes());
+        String[] tagArray = StringUtils.split(new String(decoded), ";");
+        List<String> tagList = new ArrayList<>(Arrays.asList(tagArray));
+
+        // parameter verification step
+        verificationService.verifyParameters(true, "logicalDeviceId", logicalDeviceId);
+        verificationService.verifyParameters(true, "tagName", tagList);
+
+        // user verification step
+        if(testFlag == null || !testFlag) {
+            String userId = httpRequest.getHeader(ParameterName.USER_ID);
+            if (!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
+                throw new NotRegisteredDeviceException(logicalDeviceId);
+            }
+            reqInfo.put(InternalCommonKey.USER_ID, httpRequest.getHeader(ParameterName.USER_ID));
+            reqInfo.put(InternalCommonKey.LOGICAL_DEVICE_ID, logicalDeviceId);
+            reqInfo.put(InternalCommonKey.FROM, String.valueOf(from));
+            reqInfo.put(InternalCommonKey.TO, String.valueOf(to));
+            reqInfo.put(InternalCommonKey.METHOD, String.valueOf(method));
+            reqInfo.put(InternalCommonKey.AGGREGATE, String.valueOf(aggregate));
+        }
+
+        JsonObject resultContent = dataService.getDeviceInstanceHistoryData(logicalDeviceId, tagList, reqInfo);
 
         base.setResult(resultContent);
         base.setResultCode(ResultCode.SUCCESS.getResultCode());
