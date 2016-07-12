@@ -3,6 +3,8 @@ package com.lge.hems.user.controller;
 import com.lge.hems.user.model.JoinRequestForm;
 import com.lge.hems.user.model.UserlInformation;
 import com.lge.hems.user.service.core.user.*;
+import com.lge.hems.device.model.common.entity.DeviceInstanceInformation;
+import com.lge.hems.device.service.core.deviceinstance.DeviceInstanceService;
 import com.lge.hems.device.utilities.logger.LoggerImpl;
 import com.lge.hems.user.service.dao.rds.UserDao;
 
@@ -46,6 +48,8 @@ public class UserController {
 	private UserDao userDao;
 	@Autowired
 	private UserService userService;
+	@Autowired
+    private DeviceInstanceService deviceInstanceService;
 	
 	String KIWI_API_URL = "https://lgservice-lg.appdev.kiwigrid.com";		//Appdev
 	//String KIWI_API_URL = "https://lgservice.telstra.hemsportal.com";		//telstra
@@ -105,6 +109,15 @@ public class UserController {
 		
 		//DB 저장
 		userDao.registerUser(userBody);
+		
+		DeviceInstanceInformation gatewayInfo = new DeviceInstanceInformation();
+		gatewayInfo.setCreateTimestamp(System.currentTimeMillis());
+		gatewayInfo.setDeviceId(userBody.getEmSN());
+		gatewayInfo.setNameTag("Kiwigrid gateway");
+		gatewayInfo.setServiceType("10001");
+		gatewayInfo.setModelName("KIWIGRID/EMR");
+		gatewayInfo.setDeviceType("energy.gateway");
+		deviceInstanceService.createDeviceInstance(gatewayInfo, userBody.getUserId());
 		
 		return userInfo;
 	}

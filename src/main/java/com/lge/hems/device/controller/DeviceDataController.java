@@ -61,7 +61,7 @@ public class DeviceDataController {
     @RequestMapping(value = "/encode", method = RequestMethod.POST, produces = "application/json;charset=utf-8")
     public String encodingDeviceKeyArray(@RequestBody List<String> request) {
         StringBuffer sb = new StringBuffer();
-        Iterator it = request.iterator();
+        Iterator<String> it = request.iterator();
         while(it.hasNext()) {
             sb.append(it.next());
             if(it.hasNext()) {
