@@ -63,7 +63,7 @@ public class HttpGetAdapter implements DeviceInstanceDataAdapter{
             }
 
             // add more information of requestInfo from data leaf model.
-            for(int i = 2; i < paramArr.length; i++) {
+            for(int i = 3; i < paramArr.length; i++) {
                 requestInfo.put(paramArr[i].substring(0, paramArr[i].indexOf(":")).trim(), paramArr[i].substring(paramArr[i].indexOf(":") + 1, paramArr[i].length()).trim());
             }
 
