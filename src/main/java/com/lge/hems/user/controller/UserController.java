@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
@@ -46,11 +45,7 @@ public class UserController {
 	@LoggerImpl
 	private Logger logger;
 	@Autowired
-	private UserDao userDao;
-	@Autowired
 	private UserService userService;
-	@Autowired
-    private DeviceInstanceService deviceInstanceService;
 	@Autowired
 	private RestServiceUtil restServiceUtil;
 	
@@ -60,12 +55,12 @@ public class UserController {
 	String KIWI_USER_REGISTRATION_URL = "/usermanagement/updateUserMetaInformation";
 	String KIWI_EM_BINDING_URL = "/embinding/bindEmToUser";
 	
-	@RequestMapping(value = "/{user_id}", method = RequestMethod.GET)
-	public UserlInformation inquire(@PathVariable(value = "user_id") String user_id) throws Exception {
+	@RequestMapping(value = "/{userId}", method = RequestMethod.GET)
+	public UserlInformation inquire(@PathVariable(value = "userId") String userId) throws Exception {
 		List<UserlInformation> userList = new ArrayList<UserlInformation>();
 		UserlInformation userInfo = null;
 		
-		userList = userDao.getUserInfo(user_id);
+		userList = userService.getUserInformation(userId);
 		
 		if (!userList.isEmpty()) {
 			userInfo = userList.get(0); 
@@ -83,14 +78,15 @@ public class UserController {
 	@RequestMapping(method = RequestMethod.POST)
 	public UserlInformation joinHems(@RequestBody JoinRequestForm userBody) throws Exception {
 		UserlInformation userInfo = null;
+		String hemsId = null;
 		String resultAvailCheck = null;
 		
-		userService.createUserNo(userBody.getUserId());
+		hemsId = userService.createHemsId(userBody.getUserId());
 		
 		JSONObject json_user = new JSONObject();
 		JSONObject json_em = new JSONObject();
 		JSONArray list = new JSONArray();
-		
+		/*
 		//Kiwigrid availability check	
 		resultAvailCheck = callGetActionToKiwigrid(KIWI_API_URL + KIWI_AVAILABILITY_CHECK_URL + "?emSN=" + userBody.getEmSN() + "&emPassword=" + userBody.getEmPassword());
 		
@@ -105,22 +101,19 @@ public class UserController {
 		callPostActionToKiwigrid(KIWI_API_URL + KIWI_USER_REGISTRATION_URL + "?userId=" + userBody.getUserId(), json_user);
 		
 		//Kiwigrid EM Binding
-		json_em.put("userId", userBody.getUserId());
+		json_em.put("userId", hemsId);
 		json_em.put("emSN", userBody.getEmSN());
 		json_em.put("emPassword", userBody.getEmPassword());
 		callGetActionToKiwigrid(KIWI_API_URL + KIWI_EM_BINDING_URL);
+		*/
 		
 		//DB 저장
-		userDao.registerUser(userBody);
-		
-		DeviceInstanceInformation gatewayInfo = new DeviceInstanceInformation();
-		gatewayInfo.setCreateTimestamp(System.currentTimeMillis());
-		gatewayInfo.setDeviceId(userBody.getEmSN());
-		gatewayInfo.setNameTag("Kiwigrid gateway");
-		gatewayInfo.setServiceType("10001");
-		gatewayInfo.setModelName("KIWIGRID/EMR");
-		gatewayInfo.setDeviceType("energy.gateway");
-		deviceInstanceService.createDeviceInstance(gatewayInfo, userBody.getUserId());
+		try {
+			userService.registerUser(hemsId, userBody);
+			userService.registerDeviceMapping(hemsId, userBody.getEmSN());
+		} catch (Exception e) {
+            e.printStackTrace();
+        }
 		
 		return userInfo;
 	}
