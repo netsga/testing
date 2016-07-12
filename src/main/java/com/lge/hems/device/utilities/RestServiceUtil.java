@@ -26,7 +26,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-<<<<<<< HEAD
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPatch;
@@ -45,20 +44,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-=======
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.KeyStore;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.AbstractMap;
-import java.util.Map;
->>>>>>> branch 'master' of https://github.com/netsga/testing.git
 
 /**
  * Created by netsga on 2016. 7. 1..6
@@ -80,88 +65,59 @@ public class RestServiceUtil {
 		this.restTemplate = new RestTemplate(restConfig);
 	}
 
-<<<<<<< HEAD
 	public Map.Entry<HttpStatus, String> requestGetMethod(String urlStr, String headerStr, String certiKey,
 			String password) {
-=======
-//        HttpHeaders headers = new HttpHeaders();
-//        // Header parameter needs split for create rest header using "|"
-//        String[] headerStrArr = StringUtils.split(headerStr, "|");
-//        for(String header:headerStrArr) {
-//            String[] headerArr = StringUtils.split(header, ":");
-//            headers.set(headerArr[0].trim(), headerArr[1].trim());
-//        }
-//
-//        HttpEntity<String> entity = new HttpEntity<String>("params",headers);
-//
-//        ResponseEntity<String> restResp = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
-    	String result = callGetActionToKiwigrid(url, headerStr);
-//        String respValue = (String) jsonMessageConverter.getValueFromMessage(restResp.getBody(), "result.PSMT_001.ST.LastCommTm.stVal");
-
-        return new AbstractMap.SimpleEntry<>(HttpStatus.OK, result);
-    }
-    
-    public String callExternalApi(String api_url) throws Exception {
-		BufferedReader in = null;
-		StringBuilder builder = new StringBuilder();
-		
+		String result = null;
+		HttpStatus respStatus = null;
+		HttpsURLConnection conn = null;
 		try {
-			URL url = new URL(api_url);
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			
-			conn.setRequestMethod("GET");
-			in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-			
-			String str_buffer = "";
-	
-			while ((str_buffer = in.readLine()) != null) {
-				builder.append(str_buffer + "\n");
+			URL url = new URL(urlStr);
+			conn = (HttpsURLConnection) url.openConnection();
+			conn.setConnectTimeout(1000);
+			conn.setReadTimeout(1000);
+
+			String[] headerStrArr = StringUtils.split(headerStr, "|");
+			for (String header : headerStrArr) {
+				String[] headerArr = StringUtils.split(header, ":");
+				conn.addRequestProperty(headerArr[0].trim(), headerArr[1].trim());
 			}
+
+			if (urlStr.toLowerCase().startsWith(HTTPS)) {
+				conn.setSSLSocketFactory(getFactory(certiKey, password));
+			} else if (urlStr.toLowerCase().startsWith(HTTP)) {
+
+			}
+
+			try {
+				conn.connect();
+			} catch (Exception e) {
+
+			}
+
+			InputStream in = conn.getInputStream();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+			StringBuilder sb = new StringBuilder();
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				sb.append(line);
+			}
+
+			respStatus = HttpStatus.valueOf(conn.getResponseCode());
+
+			reader.close();
+			in.close();
+			result = sb.toString();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			if (in != null)
-				try {
-					in.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-		}
-		
-		return builder.toString();
-    }
-    
-    public String callExternalApi(String api_url) throws Exception {
-		BufferedReader in = null;
-		StringBuilder builder = new StringBuilder();
-		
-		try {
-			URL url = new URL(api_url);
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-			
-			conn.setRequestMethod("GET");
-			in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-			
-			String str_buffer = "";
-	
-			while ((str_buffer = in.readLine()) != null) {
-				builder.append(str_buffer + "\n");
+			if (conn != null) {
+				conn.disconnect();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (in != null)
-				try {
-					in.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
 		}
-		
-		return builder.toString();
-    }
-    
+
+		return new AbstractMap.SimpleEntry<>(respStatus, result);
+	}
+
 	public Map.Entry<HttpStatus, String> requestPostMethod(String urlStr, String headerStr, String bodyStr,
 			String certiKey, String password) {
 		String result = null;
