@@ -99,7 +99,7 @@ public class DeviceInstanceDataServiceTest {
         request.put("PSMT_001.DC.LogicalInfo.nameTag", "test value for tag");
 
         JsonObject expected = convertMapToJsonObject(request);
-        JsonObject actual = dataService.updateDeviceInstanceData(this.logicalDeviceId, "PSMT_001.DC.LogicalInfo.nameTag", "test value for tag");
+        JsonObject actual = null;//dataService.updateDeviceInstanceData(this.logicalDeviceId, "PSMT_001.DC.LogicalInfo.nameTag", "test value for tag");
         assertEquals(expected, actual);
     }
 

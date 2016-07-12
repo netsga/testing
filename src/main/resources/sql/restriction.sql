@@ -4,7 +4,7 @@ LIMIT 0, 500
 
 -- Date: 2016-06-30 08:49
 */
-INSERT INTO `tbl_parameter_restriction` (`parameter_name`,`length`,`need_check`,`parameter_type`,`number_range`,`regex`) VALUES ('deviceId','.{1,100}',1,'STRING',NULL,'^[0-9A-Za-z-_:]*$');
+INSERT INTO `tbl_parameter_restriction` (`parameter_name`,`length`,`need_check`,`parameter_type`,`number_range`,`regex`) VALUES ('deviceId','.{1,100}',1,'STRING',NULL,'^[0-9A-Za-z-_.:]*$');
 INSERT INTO `tbl_parameter_restriction` (`parameter_name`,`length`,`need_check`,`parameter_type`,`number_range`,`regex`) VALUES ('deviceType','.{1,100}',1,'STRING',NULL,'^[0-9A-Za-z.]*$');
 INSERT INTO `tbl_parameter_restriction` (`parameter_name`,`length`,`need_check`,`parameter_type`,`number_range`,`regex`) VALUES ('location','.{0,255}',1,'STRING',NULL,'^[0-9A-Za-z-_.,! 가-힣]*$');
 INSERT INTO `tbl_parameter_restriction` (`parameter_name`,`length`,`need_check`,`parameter_type`,`number_range`,`regex`) VALUES ('logicalDeviceId','.{1,50}',1,'STRING',NULL,'^[0-9A-Za-z-]*$');

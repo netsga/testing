@@ -18,15 +18,18 @@ import org.springframework.stereotype.Service;
 import com.google.gson.JsonObject;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
+import com.lge.hems.device.exceptions.DeviceInstanceLeafInfoException;
 import com.lge.hems.device.exceptions.RequestParameterException;
 import com.lge.hems.device.exceptions.deviceinstance.DeviceInstanceDataReadException;
 import com.lge.hems.device.exceptions.deviceinstance.DeviceInstanceDataUpdateException;
 import com.lge.hems.device.exceptions.deviceinstance.NullInstanceException;
+import com.lge.hems.device.exceptions.deviceinstance.NullLeafInformationException;
 import com.lge.hems.device.model.common.DeviceModelInformation;
 import com.lge.hems.device.model.common.InternalCommonKey;
 import com.lge.hems.device.model.common.entity.DeviceInstanceInformation;
-import com.lge.hems.device.service.core.deviceinstance.adapters.HttpGetAdapter;
 import com.lge.hems.device.service.core.deviceinstance.adapters.InstanceDataAdapter;
+import com.lge.hems.device.service.core.deviceinstance.adapters.kiwigrid.KiwigridPatchAdapter;
+import com.lge.hems.device.service.core.deviceinstance.adapters.rest.HttpGetAdapter;
 import com.lge.hems.device.service.core.devicemodel.DeviceModelService;
 import com.lge.hems.device.service.dao.cache.CacheRepository;
 import com.lge.hems.device.service.dao.rds.DeviceInstanceRepository;
@@ -59,6 +62,8 @@ public class DeviceInstanceDataService {
     private InstanceDataAdapter instanceDataAdapter;
     @Autowired
     private HttpGetAdapter httpGetAdapter;
+    @Autowired
+    private KiwigridPatchAdapter kiwigridPatchAdapter;
 
 
     ///////////////////////////////////////// READ ///////////////////////////////////////////
@@ -85,15 +90,10 @@ public class DeviceInstanceDataService {
             // 현재는 아래처럼 모든 type을 호출하지만 차후 factory를 통해서 알아서 가져오도록 만들어야 함.
             // read leaf information
             Map<String, Map<String, Object>> leafInfo = readLeafInfo(logicalDeviceId, requestKeys);
-
             // read all instance type data
             readResp.putAll(instanceDataAdapter.getDeviceInstanceData(logicalDeviceId, leafInfo));
-
             // read all http get type data
             readResp.putAll(httpGetAdapter.getDeviceInstanceData(logicalDeviceId, leafInfo, reqInfo));
-
-            // read all http post type data
-
             // read all datamanager type data
 
         } catch (Exception e) {
@@ -176,7 +176,7 @@ public class DeviceInstanceDataService {
     }
     /////////////////////////////////////// UPDATE ///////////////////////////////////////////
 
-    public JsonObject updateDeviceInstanceData(String logicalDeviceId, Map<String, Object> updateData) throws DeviceInstanceDataUpdateException, NullInstanceException {
+    public JsonObject updateDeviceInstanceData(String logicalDeviceId, Map<String, Object> updateData, Map<String, String> reqInfo) throws DeviceInstanceDataUpdateException, NullInstanceException {
         JsonObject result;
         List<String> updateKeys = new ArrayList<>(updateData.keySet());
 
@@ -190,6 +190,31 @@ public class DeviceInstanceDataService {
         } catch (Exception e) {
             throw new DeviceInstanceDataUpdateException("Device data update error", logicalDeviceId, updateData, e);
         }
+        
+   
+        reqInfo.put(InternalCommonKey.RAW_DEVICE_ID, instanceRepository.findByLogicalDeviceId(logicalDeviceId).getDeviceId());
+        // 현재는 아래처럼 모든 type을 호출하지만 차후 factory를 통해서 알아서 가져오도록 만들어야 함.
+        // read leaf information
+        Map<String, Map<String, Object>> leafInfo;
+		try {
+			leafInfo = readLeafInfo(logicalDeviceId, updateKeys);
+			try {
+				kiwigridPatchAdapter.postDeviceInstanceData(logicalDeviceId, leafInfo, reqInfo);
+			} catch (DeviceInstanceLeafInfoException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NullLeafInformationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (RequestParameterException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} catch (DeviceInstanceDataReadException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        
 
         try {
             Map<String, Object> readResp = cacheRepository.readDeviceInstanceData(logicalDeviceId, updateKeys);
@@ -201,7 +226,7 @@ public class DeviceInstanceDataService {
         return result;
     }
 
-    public JsonObject updateDeviceInstanceData(String logicalDeviceId, String key, Object data) throws DeviceInstanceDataUpdateException, NullInstanceException {
+    public JsonObject updateDeviceInstanceData(String logicalDeviceId, String key, Object data, Map<String, String> reqInfo) throws DeviceInstanceDataUpdateException, NullInstanceException {
         JsonObject result;
 
         // key availability check
@@ -214,6 +239,33 @@ public class DeviceInstanceDataService {
         } catch (Exception e) {
             throw new DeviceInstanceDataUpdateException("Device data update error", logicalDeviceId, key, String.valueOf(data));
         }
+        
+        reqInfo.put(InternalCommonKey.RAW_DEVICE_ID, instanceRepository.findByLogicalDeviceId(logicalDeviceId).getDeviceId());
+        reqInfo.put("value", String.valueOf(data));
+        // 현재는 아래처럼 모든 type을 호출하지만 차후 factory를 통해서 알아서 가져오도록 만들어야 함.
+        // read leaf information
+        Map<String, Map<String, Object>> leafInfo;
+        List<String> updateKeys = CollectionFactory.newList();
+        updateKeys.add(key);
+		try {
+			leafInfo = readLeafInfo(logicalDeviceId, updateKeys);
+			try {
+				kiwigridPatchAdapter.postDeviceInstanceData(logicalDeviceId, leafInfo, reqInfo);
+			} catch (DeviceInstanceLeafInfoException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NullLeafInformationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (RequestParameterException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} catch (DeviceInstanceDataReadException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        
 
         try {
             Object readResp = cacheRepository.readDeviceInstanceData(logicalDeviceId, key);

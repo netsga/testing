@@ -187,7 +187,8 @@ public class DeviceDataController {
         JsonObject resultContent;
         Map<String, Object> content = request.getRequest();
         List<String> tagNames = new ArrayList<>(content.keySet());
-
+        Map<String, String> reqInfo = CollectionFactory.newMap();
+        
         // parameter verification step
         verificationService.verifyParameters(true, "logicalDeviceId", logicalDeviceId);
         verificationService.updatableCheck(tagNames);
@@ -199,9 +200,12 @@ public class DeviceDataController {
             if (!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
                 throw new NotRegisteredDeviceException(logicalDeviceId);
             }
+            
+            reqInfo.put(InternalCommonKey.USER_ID, httpRequest.getHeader(ParameterName.USER_ID));
+            reqInfo.put(InternalCommonKey.LOGICAL_DEVICE_ID, logicalDeviceId);
         }
 
-        resultContent = dataService.updateDeviceInstanceData(logicalDeviceId, content);
+        resultContent = dataService.updateDeviceInstanceData(logicalDeviceId, content, reqInfo);
 
         BaseResponse base = new BaseResponse();
         base.setResult(resultContent);
@@ -229,6 +233,7 @@ public class DeviceDataController {
     public BaseResponse controlDeviceSinglePoint(String logicalDeviceId, DeviceControlRequest request, Boolean testFlag) throws Exception {
         JsonObject resultContent;
         Map<String, Object> content = request.getRequest();
+        Map<String, String> reqInfo = CollectionFactory.newMap();
 
         // parameter verification step
         if(content.size() != 1) {
@@ -246,10 +251,12 @@ public class DeviceDataController {
             if (!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
                 throw new NotRegisteredDeviceException(logicalDeviceId);
             }
+            reqInfo.put(InternalCommonKey.USER_ID, httpRequest.getHeader(ParameterName.USER_ID));
+            reqInfo.put(InternalCommonKey.LOGICAL_DEVICE_ID, logicalDeviceId);
         }
 
         // control
-        resultContent = dataService.updateDeviceInstanceData(logicalDeviceId, controlKey, content.values().iterator().next());
+        resultContent = dataService.updateDeviceInstanceData(logicalDeviceId, controlKey, content.values().iterator().next(), reqInfo);
 
         BaseResponse base = new BaseResponse();
         base.setResult(resultContent);

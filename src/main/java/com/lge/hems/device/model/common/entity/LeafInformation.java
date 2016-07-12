@@ -1,5 +1,6 @@
 package com.lge.hems.device.model.common.entity;
 
+import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 
@@ -52,10 +53,18 @@ public class LeafInformation {
 
     @EmbeddedId
     private LeafInformationKey leafInformationKey;
+    @Column(length = 2000)
     private String url;
+    @Column(length = 512)
     private String header;
+    @Column(length = 4096)
     private String body;
+    @Column(length = 2000)
     private String description;
+    @Column(length = 50)
+    private String certificationKey;
+    @Column(length = 50)
+    private String password;
 
     public LeafInformationKey getLeafInformationKey() {
         return leafInformationKey;
@@ -96,15 +105,27 @@ public class LeafInformation {
     public void setHeader(String header) {
         this.header = header;
     }
+    
+    public String getCertificationKey() {
+		return certificationKey;
+	}
 
-    @Override
-    public String toString() {
-        return "LeafInformation{" +
-                "leafInformationKey=" + leafInformationKey +
-                ", url='" + url + '\'' +
-                ", header='" + header + '\'' +
-                ", body='" + body + '\'' +
-                ", description='" + description + '\'' +
-                '}';
-    }
+	public void setCertificationKey(String certificationKey) {
+		this.certificationKey = certificationKey;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	@Override
+	public String toString() {
+		return "LeafInformation [leafInformationKey=" + leafInformationKey + ", url=" + url + ", header=" + header
+				+ ", body=" + body + ", description=" + description + ", certificationKey=" + certificationKey
+				+ ", password=" + password + "]";
+	}
 }
