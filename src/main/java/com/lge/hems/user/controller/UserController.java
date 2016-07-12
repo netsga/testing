@@ -5,6 +5,7 @@ import com.lge.hems.user.model.UserlInformation;
 import com.lge.hems.user.service.core.user.*;
 import com.lge.hems.device.model.common.entity.DeviceInstanceInformation;
 import com.lge.hems.device.service.core.deviceinstance.DeviceInstanceService;
+import com.lge.hems.device.utilities.RestServiceUtil;
 import com.lge.hems.device.utilities.logger.LoggerImpl;
 import com.lge.hems.user.service.dao.rds.UserDao;
 
@@ -50,6 +51,8 @@ public class UserController {
 	private UserService userService;
 	@Autowired
     private DeviceInstanceService deviceInstanceService;
+	@Autowired
+	private RestServiceUtil restServiceUtil;
 	
 	String KIWI_API_URL = "https://lgservice-lg.appdev.kiwigrid.com";		//Appdev
 	//String KIWI_API_URL = "https://lgservice.telstra.hemsportal.com";		//telstra
@@ -157,7 +160,7 @@ public class UserController {
 		try {
 			URL url = new URL(pingUrl);
 			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-			conn.setSSLSocketFactory(getFactory("ad4-lg.p12", "kiwigrid"));		//AppDev
+			conn.setSSLSocketFactory(restServiceUtil.getFactory("ad4-lg.p12", "kiwigrid"));		//AppDev
 			//conn.setSSLSocketFactory(getFactory("/pilot-telstra.p12", "kiwigrid"));		//pilot-telstra
 			conn.connect();
 			InputStream in = conn.getInputStream();
@@ -178,47 +181,5 @@ public class UserController {
 		System.out.println(result);
 		
 		return result;
-	}
-
-	private SSLSocketFactory getFactory(String pKeyFile, String pKeyPassword) throws Exception {
-		String path = this.getClass().getResource("").getPath();
-		InputStream keyInput = new FileInputStream(path + pKeyFile);
-		KeyStore keyStore = KeyStore.getInstance("PKCS12");
-		keyStore.load(keyInput, pKeyPassword.toCharArray());
-		keyInput.close();
-
-		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-		keyManagerFactory.init(keyStore, pKeyPassword.toCharArray());
-
-		SSLContext context = SSLContext.getInstance("TLS");
-		// context.init(keyManagerFactory.getKeyManagers(), null, new SecureRandom());
-
-		// add TrustManager
-		X509TrustManager trustManager = new X509TrustManager() {
-			public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-			}
-
-			public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
-				try {
-					KeyStore trustStore = KeyStore.getInstance("JKS");
-					String cacertPath = System.getProperty("java.home") + "/lib/security/cacerts"; // Trust store path should be different by system platform.
-					trustStore.load(new FileInputStream(cacertPath), "changeit".toCharArray()); // Use default certification validation
-
-					// Get Trust Manager
-					TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-					tmf.init(trustStore);
-					TrustManager[] tms = tmf.getTrustManagers();
-					((X509TrustManager) tms[0]).checkServerTrusted(arg0, arg1);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-
-			public X509Certificate[] getAcceptedIssuers() {
-				return null;
-			}
-		};
-		context.init(keyManagerFactory.getKeyManagers(), new TrustManager[] { trustManager }, new SecureRandom());
-		return context.getSocketFactory();
 	}
 }

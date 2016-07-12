@@ -96,14 +96,11 @@ public class RestServiceUtil {
 			e.printStackTrace();
 		} 
 		
-		System.out.println(result);
-		
 		return result;
 	}
 
-	private SSLSocketFactory getFactory(String pKeyFile, String pKeyPassword) throws Exception {
-		String path = this.getClass().getResource("").getPath();
-		InputStream keyInput = new FileInputStream(path + pKeyFile);
+	public SSLSocketFactory getFactory(String pKeyFile, String pKeyPassword) throws Exception {
+		InputStream keyInput = this.getClass().getClassLoader().getResourceAsStream("certificates/" + pKeyFile);
 		KeyStore keyStore = KeyStore.getInstance("PKCS12");
 		keyStore.load(keyInput, pKeyPassword.toCharArray());
 		keyInput.close();
