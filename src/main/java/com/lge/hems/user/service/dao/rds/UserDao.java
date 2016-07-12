@@ -25,14 +25,16 @@ public class UserDao {
 		return (List<UserlInformation>) template.query(query, new Object[] { user_id }, new BeanPropertyRowMapper(UserlInformation.class));
 	}
 	
-	public int registerUser(JoinRequestForm requestBody) {
+	public int registerUser(String hemsId, JoinRequestForm requestBody) {
 		String query = "INSERT INTO tbl_user_information ("
+															   + "hems_id, "
 															   + "user_id, "
 															   + "account_type, "
 															   + "access_token"
 															   + ") "
-															   + "VALUES(?,?,?)";
-		return template.update(query, requestBody.getUserId(), 
+															   + "VALUES(?,?,?,?)";
+		return template.update(query, hemsId.toUpperCase(),
+									  requestBody.getUserId(), 
 									  requestBody.getAccountType(), 
 									  requestBody.getAccessToken()
 				);

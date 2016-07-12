@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.SecureRandom;
@@ -62,6 +63,36 @@ public class RestServiceUtil {
 //        String respValue = (String) jsonMessageConverter.getValueFromMessage(restResp.getBody(), "result.PSMT_001.ST.LastCommTm.stVal");
 
         return new AbstractMap.SimpleEntry<>(HttpStatus.OK, result);
+    }
+    
+    public String callExternalApi(String api_url) throws Exception {
+		BufferedReader in = null;
+		StringBuilder builder = new StringBuilder();
+		
+		try {
+			URL url = new URL(api_url);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			
+			conn.setRequestMethod("GET");
+			in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+			
+			String str_buffer = "";
+	
+			while ((str_buffer = in.readLine()) != null) {
+				builder.append(str_buffer + "\n");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (in != null)
+				try {
+					in.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+		}
+		
+		return builder.toString();
     }
     
     private String callGetActionToKiwigrid(String api_url, String headerStr) {

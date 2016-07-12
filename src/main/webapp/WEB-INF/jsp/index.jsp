@@ -10,7 +10,7 @@
 	String SERVER_URL = "https://accounts.google.com/o/oauth2/auth";
 	String CLIENT_ID = "505972002650-kugtircr83k68jm4as5dhsbo832am5en.apps.googleusercontent.com";
 	String REDIRECT_URI = "http://localhost:8080/success";
-	String SCOPE = "email";
+	String SCOPE = "email profile";
 	String APPROVAL_PROMPT = "force";
 	String ACCESS_TYPE = "online";
 	
@@ -104,6 +104,8 @@
 		
 		String resultValid = callAPI(callValidationUrl);
 		jsonObject = (JSONObject)jsonParser.parse(resultValid);
+		
+		out.println("resultValid:"+resultValid);
 		
 		user_id = (String)jsonObject.get("email");
 				

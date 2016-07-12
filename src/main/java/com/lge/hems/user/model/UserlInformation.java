@@ -9,11 +9,18 @@ import java.util.Map;
  * Created by pje on 2016. 7. 7..
  */
 public class UserlInformation {
+	private String hemsId;
     private String userId;
     private String accountType;
     private String accessToken;
     private String userRegDate;
     
+	public String getHemsId() {
+		return hemsId;
+	}
+	public void setHemsId(String hemsId) {
+		this.hemsId = hemsId;
+	}
 	public String getUserId() {
 		return userId;
 	}
