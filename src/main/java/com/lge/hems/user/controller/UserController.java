@@ -128,7 +128,7 @@ public class UserController {
 	private void callPostActionToKiwigrid(String api_url, JSONObject json) throws Exception {
 		    URL url = new URL(api_url);
 			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-			conn.setSSLSocketFactory(getFactory("/ad4-lg.p12", "kiwigrid"));		//AppDev
+			conn.setSSLSocketFactory(restServiceUtil.getFactory("/ad4-lg.p12", "kiwigrid"));		//AppDev
 			//conn.setSSLSocketFactory(getFactory("/pilot-telstra.p12", "kiwigrid"));		//pilot-telstra
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Content-Type", "application/json");
