@@ -1,11 +1,25 @@
 package com.lge.hems.device.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.google.gson.JsonObject;
-import com.lge.hems.device.exceptions.ModelReadFailException;
-import com.lge.hems.device.exceptions.NullModelException;
-import com.lge.hems.device.exceptions.NullRequestException;
 import com.lge.hems.device.exceptions.RequestParameterException;
-import com.lge.hems.device.exceptions.deviceinstance.*;
+import com.lge.hems.device.exceptions.deviceinstance.NotRegisteredDeviceException;
 import com.lge.hems.device.model.common.ResultCode;
 import com.lge.hems.device.model.common.entity.DeviceInstanceInformation;
 import com.lge.hems.device.model.controller.request.DeviceInstanceCreateRequest;
@@ -19,16 +33,7 @@ import com.lge.hems.device.service.core.verification.VerificationService;
 import com.lge.hems.device.utilities.CollectionFactory;
 import com.lge.hems.device.utilities.customize.JsonConverter;
 import com.lge.hems.device.utilities.logger.LoggerImpl;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import java.text.SimpleDateFormat;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Date;
-import java.util.List;
+import com.lge.hems.user.service.core.user.UserService;
 
 /**
  * Created by netsga on 2016. 5. 24..
@@ -50,6 +55,8 @@ public class DeviceInstanceController {
     private HttpServletRequest httpRequest;
     @Autowired
     private UserDeviceRelationService userDeviceRelationService;
+    @Autowired
+    private UserService userService;
 
     // member variables
     private SimpleDateFormat sdf;
@@ -70,7 +77,7 @@ public class DeviceInstanceController {
      */
     @SuppressWarnings("unchecked")
     @RequestMapping(method = RequestMethod.POST, produces = "application/json;charset=utf-8", consumes = "application/json;charset=utf-8")
-    public BaseResponse createDeviceInstance(@RequestBody DeviceInstanceCreateRequest request) throws RequestParameterException, NullRequestException, ModelReadFailException, NullModelException, DuplicateDeviceException, AddDeviceInstanceDataException, InstanceReadFailException {
+    public BaseResponse createDeviceInstance(@RequestBody DeviceInstanceCreateRequest request) throws Exception {
         BaseResponse result = new BaseResponse();
         DeviceInstanceResponse resultContent = new DeviceInstanceResponse();
         DeviceInstanceInformation deviceInfo = request.getRequest();
@@ -93,8 +100,12 @@ public class DeviceInstanceController {
                 new SimpleEntry(ParameterName.VERSION, deviceInfo.getVersion()),
                 new SimpleEntry(ParameterName.LOGICAL_DEVICE_ID, deviceInfo.getLogicalDeviceId()));
 
+        // user verification step
+        String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
+    	String userId = userService.checkValidationIdByAccessToken(accessToken);
+    	
         try {
-            createLdId = deviceInstanceService.createDeviceInstance(deviceInfo, httpRequest.getHeader(ParameterName.USER_ID));
+            createLdId = deviceInstanceService.createDeviceInstance(deviceInfo, userId);
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -132,7 +143,11 @@ public class DeviceInstanceController {
                 new SimpleEntry(ParameterName.DEVICE_ID, deviceId));
 
 
-        List<DeviceInstanceInformation> resultContents = deviceInstanceService.searchDeviceInstances(httpRequest.getHeader(ParameterName.USER_ID), serviceType, deviceType, modelName, deviceId);
+        // user verification step
+        String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
+    	String userId = userService.checkValidationIdByAccessToken(accessToken);
+        
+        List<DeviceInstanceInformation> resultContents = deviceInstanceService.searchDeviceInstances(userId, serviceType, deviceType, modelName, deviceId);
 
         for(DeviceInstanceInformation info: resultContents) {
             DeviceInstanceResponse content = new DeviceInstanceResponse();
@@ -165,7 +180,10 @@ public class DeviceInstanceController {
         verificationService.verifyParameters(true, ParameterName.LOGICAL_DEVICE_ID, logicalDeviceId);
 
         // user verification step
-        if(!userDeviceRelationService.checkUserDeviceMatch(httpRequest.getHeader(ParameterName.USER_ID), logicalDeviceId)) {
+        String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
+    	String userId = userService.checkValidationIdByAccessToken(accessToken);
+    	
+        if(!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
             throw new NotRegisteredDeviceException(logicalDeviceId);
         }
 
@@ -226,7 +244,10 @@ public class DeviceInstanceController {
         verificationService.verifyParameters(true, ParameterName.LOGICAL_DEVICE_ID, logicalDeviceId);
 
         // user verification step
-        if(!userDeviceRelationService.checkUserDeviceMatch(httpRequest.getHeader(ParameterName.USER_ID), logicalDeviceId)) {
+        String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
+    	String userId = userService.checkValidationIdByAccessToken(accessToken);
+    	
+        if(!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
             throw new NotRegisteredDeviceException(logicalDeviceId);
         }
 

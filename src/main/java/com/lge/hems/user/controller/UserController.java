@@ -86,7 +86,7 @@ public class UserController {
 		JSONObject json_user = new JSONObject();
 		JSONObject json_em = new JSONObject();
 		JSONArray list = new JSONArray();
-		/*
+		
 		//Kiwigrid availability check	
 		resultAvailCheck = callGetActionToKiwigrid(KIWI_API_URL + KIWI_AVAILABILITY_CHECK_URL + "?emSN=" + userBody.getEmSN() + "&emPassword=" + userBody.getEmPassword());
 		
@@ -98,14 +98,14 @@ public class UserController {
 		json_user.put("email", userBody.getEmail());
 		list.add("USER");
 		json_user.put("roles", list);
-		callPostActionToKiwigrid(KIWI_API_URL + KIWI_USER_REGISTRATION_URL + "?userId=" + userBody.getUserId(), json_user);
+		callPostActionToKiwigrid(KIWI_API_URL + KIWI_USER_REGISTRATION_URL + "?userId=" + hemsId, json_user);
 		
 		//Kiwigrid EM Binding
 		json_em.put("userId", hemsId);
 		json_em.put("emSN", userBody.getEmSN());
 		json_em.put("emPassword", userBody.getEmPassword());
-		callGetActionToKiwigrid(KIWI_API_URL + KIWI_EM_BINDING_URL);
-		*/
+		callPostActionToKiwigrid(KIWI_API_URL + KIWI_EM_BINDING_URL, json_em);
+		
 		
 		//DB 저장
 		try {

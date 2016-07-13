@@ -6,19 +6,8 @@ package com.lge.hems.device.service.core.verification;
 public class ParameterName {
     // Header
     public static final String USER_ID = "user-id";
+    public static final String ACCESS_TOKEN = "access-token";
 
-    /*
-                    new SimpleEntry("", requestContent.getDeviceType()),
-                new SimpleEntry("", requestContent.getModelName()),
-                new SimpleEntry("", requestContent.getVendor()),
-                new SimpleEntry("serviceType", requestContent.getServiceType()));
-
-        verificationService.verifyParameters(false, new SimpleEntry("nameTag", requestContent.getNameTag()),
-                new SimpleEntry("subNameTag", requestContent.getSubNameTag()),
-                new SimpleEntry("subSubNameTag", requestContent.getSubSubNameTag()),
-                new SimpleEntry("version", requestContent.getVersion()),
-                new SimpleEntry("logicalDeviceId", requestContent.getLogicalDeviceId()));
-     */
 
 
     // Body

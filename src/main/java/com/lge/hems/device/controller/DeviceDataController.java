@@ -34,6 +34,7 @@ import com.lge.hems.device.service.core.verification.ParameterName;
 import com.lge.hems.device.service.core.verification.VerificationService;
 import com.lge.hems.device.utilities.CollectionFactory;
 import com.lge.hems.device.utilities.logger.LoggerImpl;
+import com.lge.hems.user.service.core.user.UserService;
 
 /**
  * Created by netsga on 2016. 5. 24..
@@ -51,6 +52,8 @@ public class DeviceDataController {
     private UserDeviceRelationService userDeviceRelationService;
     @Autowired
     private DeviceInstanceDataService dataService;
+    @Autowired
+    private UserService userService;
 
     /**
      * Request encoding for read data API
@@ -103,11 +106,13 @@ public class DeviceDataController {
 
         // user verification step
         if(testFlag == null || !testFlag) {
-            String userId = httpRequest.getHeader(ParameterName.USER_ID);
+        	String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
+        	String userId = userService.checkValidationIdByAccessToken(accessToken);
             if (!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
                 throw new NotRegisteredDeviceException(logicalDeviceId);
             }
-            reqInfo.put(InternalCommonKey.USER_ID, httpRequest.getHeader(ParameterName.USER_ID));
+            reqInfo.put(InternalCommonKey.USER_ID, userId);
+            reqInfo.put(InternalCommonKey.HEMS_ID, userId);
             reqInfo.put(InternalCommonKey.LOGICAL_DEVICE_ID, logicalDeviceId);
         }
 
@@ -145,13 +150,15 @@ public class DeviceDataController {
         verificationService.verifyParameters(true, "logicalDeviceId", logicalDeviceId);
         verificationService.verifyParameters(true, "tagName", tagList);
 
-        // user verification step
+     // user verification step
         if(testFlag == null || !testFlag) {
-            String userId = httpRequest.getHeader(ParameterName.USER_ID);
+        	String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
+        	String userId = userService.checkValidationIdByAccessToken(accessToken);
             if (!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
                 throw new NotRegisteredDeviceException(logicalDeviceId);
             }
-            reqInfo.put(InternalCommonKey.USER_ID, httpRequest.getHeader(ParameterName.USER_ID));
+            reqInfo.put(InternalCommonKey.USER_ID, userId);
+            reqInfo.put(InternalCommonKey.HEMS_ID, userId);
             reqInfo.put(InternalCommonKey.LOGICAL_DEVICE_ID, logicalDeviceId);
             reqInfo.put(InternalCommonKey.FROM, String.valueOf(from));
             reqInfo.put(InternalCommonKey.TO, String.valueOf(to));
@@ -196,12 +203,13 @@ public class DeviceDataController {
 
         // user verification step
         if(testFlag == null || !testFlag) {
-            String userId = httpRequest.getHeader(ParameterName.USER_ID);
+        	String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
+        	String userId = userService.checkValidationIdByAccessToken(accessToken);
             if (!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
                 throw new NotRegisteredDeviceException(logicalDeviceId);
             }
-            
-            reqInfo.put(InternalCommonKey.USER_ID, httpRequest.getHeader(ParameterName.USER_ID));
+            reqInfo.put(InternalCommonKey.USER_ID, userId);
+            reqInfo.put(InternalCommonKey.HEMS_ID, userId);
             reqInfo.put(InternalCommonKey.LOGICAL_DEVICE_ID, logicalDeviceId);
         }
 
@@ -247,11 +255,13 @@ public class DeviceDataController {
 
         // user verification step
         if(testFlag == null || !testFlag) {
-            String userId = httpRequest.getHeader(ParameterName.USER_ID);
+        	String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
+        	String userId = userService.checkValidationIdByAccessToken(accessToken);
             if (!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
                 throw new NotRegisteredDeviceException(logicalDeviceId);
             }
-            reqInfo.put(InternalCommonKey.USER_ID, httpRequest.getHeader(ParameterName.USER_ID));
+            reqInfo.put(InternalCommonKey.USER_ID, userId);
+            reqInfo.put(InternalCommonKey.HEMS_ID, userId);
             reqInfo.put(InternalCommonKey.LOGICAL_DEVICE_ID, logicalDeviceId);
         }
 
