@@ -2,7 +2,9 @@ package com.lge.hems.device.service.core.deviceinstance.adapters.rest;
 
 import com.jayway.jsonpath.JsonPath;
 import com.lge.hems.device.exceptions.DeviceInstanceLeafInfoException;
+import com.lge.hems.device.exceptions.NullRequestException;
 import com.lge.hems.device.exceptions.RequestParameterException;
+import com.lge.hems.device.exceptions.RestRequestException;
 import com.lge.hems.device.exceptions.deviceinstance.DeviceInstanceDataReadException;
 import com.lge.hems.device.exceptions.deviceinstance.NullInstanceException;
 import com.lge.hems.device.exceptions.deviceinstance.NullLeafInformationException;
@@ -50,7 +52,7 @@ public class HttpPostAdapter implements DeviceInstanceDataAdapter{
     private static final String READ = "read";
     private static final String HISTORY = "history";
 
-    public Map<String, Object> postDeviceInstanceData(String logicalDeviceId, Map<String, Map<String, Object>> leafDataMap, Map<String, String> requestInfo) throws NullInstanceException, DeviceInstanceDataReadException, RequestParameterException, DeviceInstanceLeafInfoException, NullLeafInformationException {
+    public Map<String, Object> postDeviceInstanceData(String logicalDeviceId, Map<String, Map<String, Object>> leafDataMap, Map<String, String> requestInfo) throws NullInstanceException, DeviceInstanceDataReadException, RequestParameterException, DeviceInstanceLeafInfoException, NullLeafInformationException, RestRequestException, NullRequestException {
         Map<String, Object> result = CollectionFactory.newMap();
 
         for(Map.Entry<String, Map<String, Object>> entry:leafDataMap.entrySet()) {
@@ -99,7 +101,7 @@ public class HttpPostAdapter implements DeviceInstanceDataAdapter{
         return result;
     }
     
-    public Map<String, Object> getDeviceInstanceHistoryData(String logicalDeviceId, Map<String, Map<String, Object>> leafDataMap, Map<String, String> requestInfo) throws NullInstanceException, DeviceInstanceDataReadException, RequestParameterException, DeviceInstanceLeafInfoException, NullLeafInformationException {
+    public Map<String, Object> getDeviceInstanceHistoryData(String logicalDeviceId, Map<String, Map<String, Object>> leafDataMap, Map<String, String> requestInfo) throws NullInstanceException, DeviceInstanceDataReadException, RequestParameterException, DeviceInstanceLeafInfoException, NullLeafInformationException, RestRequestException, NullRequestException {
         Map<String, Object> result = CollectionFactory.newMap();
 
         for(Map.Entry<String, Map<String, Object>> entry:leafDataMap.entrySet()) {
@@ -153,7 +155,7 @@ public class HttpPostAdapter implements DeviceInstanceDataAdapter{
 
     ////////////////////////////// PRIVATE /////////////////////////////
 
-    private String requestValueFromTargetUrl(String url, String headerStr, String parseFormat, String certiKey, String password) {
+    private String requestValueFromTargetUrl(String url, String headerStr, String parseFormat, String certiKey, String password) throws RestRequestException, NullRequestException {
 
         Map.Entry<HttpStatus, String> restResp = restServiceUtil.requestGetMethod(url, headerStr, certiKey, password);
 

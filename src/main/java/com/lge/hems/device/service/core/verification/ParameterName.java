@@ -7,6 +7,8 @@ public class ParameterName {
     // Header
     public static final String USER_ID = "user-id";
     public static final String ACCESS_TOKEN = "access-token";
+    public static final String TEST_ACCESS_FLAG = "happy-dresden";
+    public static final String TEST_ACCESS_VALUE = "lghems123";
 
 
 

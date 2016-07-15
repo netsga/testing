@@ -34,7 +34,9 @@ public class DeviceInstanceDataServiceTest {
     private static final String preLdid = "instanceService-ldid";
 
     @Autowired
-    private DeviceInstanceDataService dataService;
+    private DeviceInstanceWriteDataService dataWriteService;
+    @Autowired
+    private DeviceInstanceReadDataService dataReadService;
 
     @Autowired
     private DeviceInstanceService instanceService;
@@ -75,7 +77,7 @@ public class DeviceInstanceDataServiceTest {
         JsonParser parser = new JsonParser();
         String expectedStr = "{\"PSMT_001\":{\"CO\":{\"Op\":{\"ctlVal\":\"false\",\"operTm\":\"0\"},\"Tgl\":{\"ctlVal\":\"false\",\"operTm\":\"0\"}},\"MX\":{\"LinQual\":{\"t\":0,\"unit\":\"12\",\"meaValI\":\"0\"},\"WattHour\":{\"meaValD\":\"0\",\"unit\":\"7\",\"t\":0},\"Watt\":{\"meaValD\":\"0\",\"unit\":\"6\",\"t\":0}},\"ST\":{\"Pos\":{\"t\":0,\"stVal\":\"false\"},\"LastCommTm\":{\"t\":0,\"stVal\":\"false\"}},\"DC\":{\"DeviceInfo\":{\"vendor\":\"BitronHome\",\"model\":\"902010/25\",\"swRev\":\"15\",\"hwRev\":\"0\",\"serialNumber\":\"00124b00088dcd30\"},\"LogicalInfo\":{\"logicalId\":\"instanceService-ldid\",\"nameTag\":\"TestName\"}}}}";
         JsonObject expected = parser.parse(expectedStr).getAsJsonObject();
-        JsonObject actual = dataService.getDeviceInstanceAllData(this.logicalDeviceId);
+        JsonObject actual = dataReadService.getDeviceInstanceAllData(this.logicalDeviceId);
         assertEquals(expected, actual);
     }
 

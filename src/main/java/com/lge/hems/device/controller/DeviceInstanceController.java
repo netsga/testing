@@ -102,7 +102,8 @@ public class DeviceInstanceController {
 
         // user verification step
         String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
-    	String userId = userService.checkValidationIdByAccessToken(accessToken);
+    	String testAccessMail = httpRequest.getHeader(ParameterName.TEST_ACCESS_FLAG);
+    	String userId = userService.checkValidationIdByAccessToken(accessToken, testAccessMail);
     	
         try {
             createLdId = deviceInstanceService.createDeviceInstance(deviceInfo, userId);
@@ -145,8 +146,9 @@ public class DeviceInstanceController {
 
         // user verification step
         String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
-    	String userId = userService.checkValidationIdByAccessToken(accessToken);
-        
+    	String testAccessMail = httpRequest.getHeader(ParameterName.TEST_ACCESS_FLAG);
+    	String userId = userService.checkValidationIdByAccessToken(accessToken, testAccessMail);
+    	
         List<DeviceInstanceInformation> resultContents = deviceInstanceService.searchDeviceInstances(userId, serviceType, deviceType, modelName, deviceId);
 
         for(DeviceInstanceInformation info: resultContents) {
@@ -181,7 +183,8 @@ public class DeviceInstanceController {
 
         // user verification step
         String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
-    	String userId = userService.checkValidationIdByAccessToken(accessToken);
+    	String testAccessMail = httpRequest.getHeader(ParameterName.TEST_ACCESS_FLAG);
+    	String userId = userService.checkValidationIdByAccessToken(accessToken, testAccessMail);
     	
         if(!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
             throw new NotRegisteredDeviceException(logicalDeviceId);
@@ -216,7 +219,10 @@ public class DeviceInstanceController {
         verificationService.verifyParameters(true, ParameterName.LOGICAL_DEVICE_ID, logicalDeviceId);
 
         // user verification step
-        String userId = httpRequest.getHeader(ParameterName.USER_ID);
+        String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
+    	String testAccessMail = httpRequest.getHeader(ParameterName.TEST_ACCESS_FLAG);
+    	String userId = userService.checkValidationIdByAccessToken(accessToken, testAccessMail);
+    	
         if(!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
             throw new NotRegisteredDeviceException(logicalDeviceId);
         }
@@ -245,7 +251,8 @@ public class DeviceInstanceController {
 
         // user verification step
         String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
-    	String userId = userService.checkValidationIdByAccessToken(accessToken);
+    	String testAccessMail = httpRequest.getHeader(ParameterName.TEST_ACCESS_FLAG);
+    	String userId = userService.checkValidationIdByAccessToken(accessToken, testAccessMail);
     	
         if(!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
             throw new NotRegisteredDeviceException(logicalDeviceId);

@@ -1,44 +1,33 @@
 package com.lge.hems.device.service.core.deviceinstance.adapters.kiwigrid;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+
 import com.jayway.jsonpath.JsonPath;
 import com.lge.hems.device.exceptions.DeviceInstanceLeafInfoException;
+import com.lge.hems.device.exceptions.NullRequestException;
 import com.lge.hems.device.exceptions.RequestParameterException;
+import com.lge.hems.device.exceptions.RestRequestException;
 import com.lge.hems.device.exceptions.deviceinstance.DeviceInstanceDataReadException;
 import com.lge.hems.device.exceptions.deviceinstance.NullInstanceException;
 import com.lge.hems.device.exceptions.deviceinstance.NullLeafInformationException;
-import com.lge.hems.device.model.common.DeviceModelInformation;
 import com.lge.hems.device.model.common.entity.LeafInformation;
 import com.lge.hems.device.model.common.entity.LeafInformationKey;
-import com.lge.hems.device.service.core.deviceinstance.DeviceInstanceService;
 import com.lge.hems.device.service.core.deviceinstance.adapters.DeviceInstanceDataAdapter;
-import com.lge.hems.device.service.dao.cache.CacheRepository;
 import com.lge.hems.device.service.dao.rds.LeafInformationRepository;
 import com.lge.hems.device.utilities.CollectionFactory;
 import com.lge.hems.device.utilities.LeafUtil;
 import com.lge.hems.device.utilities.RestServiceUtil;
-import com.lge.hems.device.utilities.customize.JsonConverter;
-import com.lge.hems.device.utilities.logger.LoggerImpl;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by netsga on 2016. 6. 28..
  */
 @Component
 public class KiwigridPatchAdapter implements DeviceInstanceDataAdapter{
-    // local variables
-    @SuppressWarnings("unused")
-    @LoggerImpl
-    private Logger logger;
 
     @Autowired
     private LeafInformationRepository repository;
@@ -49,7 +38,7 @@ public class KiwigridPatchAdapter implements DeviceInstanceDataAdapter{
     private static final String MODULE_TYPE = "kiwigrid_patch";
     private static final String WRITE = "write";
 
-    public Map<String, Object> postDeviceInstanceData(String logicalDeviceId, Map<String, Map<String, Object>> leafDataMap, Map<String, String> requestInfo) throws NullInstanceException, DeviceInstanceDataReadException, RequestParameterException, DeviceInstanceLeafInfoException, NullLeafInformationException {
+    public Map<String, Object> patchDeviceInstanceData(String logicalDeviceId, Map<String, Map<String, Object>> leafDataMap, Map<String, String> requestInfo) throws NullInstanceException, DeviceInstanceDataReadException, RequestParameterException, DeviceInstanceLeafInfoException, NullLeafInformationException, NullRequestException, RestRequestException {
         Map<String, Object> result = CollectionFactory.newMap();
 
         for(Map.Entry<String, Map<String, Object>> entry:leafDataMap.entrySet()) {
@@ -92,8 +81,7 @@ public class KiwigridPatchAdapter implements DeviceInstanceDataAdapter{
                 requestInfo.put("oca", getValueFromTargetUrl(urlStr, headerStr, ocaPath, leafInfo.getCertificationKey(), leafInfo.getPassword()));
                 String body = createMessageString(leafInfo.getBody(), requestInfo);
                 
-                requestValueFromTargetUrl(urlStr, headerStr, body, paramArr[1], leafInfo.getCertificationKey(), leafInfo.getPassword());
-//                result.put(entry.getKey(), requestValueFromTargetUrl(urlStr, headerStr, paramArr[1], leafInfo.getCertificationKey(), leafInfo.getPassword()));
+                result.put(entry.getKey(), requestValueFromTargetUrl(urlStr, headerStr, body, paramArr[1], leafInfo.getCertificationKey(), leafInfo.getPassword()));
 
             } catch (DeviceInstanceLeafInfoException e) {
                 e.setLogicalDeviceId(logicalDeviceId);
@@ -107,15 +95,16 @@ public class KiwigridPatchAdapter implements DeviceInstanceDataAdapter{
 
     ////////////////////////////// PRIVATE /////////////////////////////
 
-    private String requestValueFromTargetUrl(String urlStr, String headerStr, String bodyStr, String parseFormat, String certiKey, String password) {
-
+    private String requestValueFromTargetUrl(String urlStr, String headerStr, String bodyStr, String parseFormat, String certiKey, String password) throws NullRequestException, RestRequestException {
         Map.Entry<HttpStatus, String> restResp = restServiceUtil.requestPatchMethod(urlStr, headerStr, bodyStr, certiKey, password);
-       
+        if(restResp.getKey() != HttpStatus.OK) {
+        	throw new RestRequestException("", urlStr, restResp.getKey().toString());
+        }
         Object obj = JsonPath.read(restResp.getValue(), parseFormat);
         return String.valueOf(obj);
     }
     
-    private String getValueFromTargetUrl(String url, String headerStr, String parseFormat, String certiKey, String password) {
+    private String getValueFromTargetUrl(String url, String headerStr, String parseFormat, String certiKey, String password) throws RestRequestException, NullRequestException {
         Map.Entry<HttpStatus, String> restResp = restServiceUtil.requestGetMethod(url, headerStr, certiKey, password);
         Object obj = JsonPath.read(restResp.getValue(), parseFormat);
         return String.valueOf(obj);

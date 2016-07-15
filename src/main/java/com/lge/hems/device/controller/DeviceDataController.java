@@ -28,7 +28,9 @@ import com.lge.hems.device.model.common.ResultCode;
 import com.lge.hems.device.model.controller.request.DeviceControlRequest;
 import com.lge.hems.device.model.controller.request.DeviceDataUpdateRequest;
 import com.lge.hems.device.model.controller.response.BaseResponse;
-import com.lge.hems.device.service.core.deviceinstance.DeviceInstanceDataService;
+import com.lge.hems.device.service.core.deviceinstance.DeviceInstanceReadDataService;
+import com.lge.hems.device.service.core.deviceinstance.DeviceInstanceReadHistoryService;
+import com.lge.hems.device.service.core.deviceinstance.DeviceInstanceWriteDataService;
 import com.lge.hems.device.service.core.devicerelation.UserDeviceRelationService;
 import com.lge.hems.device.service.core.verification.ParameterName;
 import com.lge.hems.device.service.core.verification.VerificationService;
@@ -51,7 +53,11 @@ public class DeviceDataController {
     @Autowired
     private UserDeviceRelationService userDeviceRelationService;
     @Autowired
-    private DeviceInstanceDataService dataService;
+    private DeviceInstanceWriteDataService dataWriteService;
+    @Autowired
+    private DeviceInstanceReadDataService dataReadService;
+    @Autowired
+    private DeviceInstanceReadHistoryService historyReadService;
     @Autowired
     private UserService userService;
 
@@ -107,7 +113,8 @@ public class DeviceDataController {
         // user verification step
         if(testFlag == null || !testFlag) {
         	String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
-        	String userId = userService.checkValidationIdByAccessToken(accessToken);
+        	String testAccessMail = httpRequest.getHeader(ParameterName.TEST_ACCESS_FLAG);
+        	String userId = userService.checkValidationIdByAccessToken(accessToken, testAccessMail);
             if (!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
                 throw new NotRegisteredDeviceException(logicalDeviceId);
             }
@@ -116,7 +123,7 @@ public class DeviceDataController {
             reqInfo.put(InternalCommonKey.LOGICAL_DEVICE_ID, logicalDeviceId);
         }
 
-        JsonObject resultContent = dataService.getDeviceInstanceData(logicalDeviceId, tagList, reqInfo);
+        JsonObject resultContent = dataReadService.getDeviceInstanceData(logicalDeviceId, tagList, reqInfo);
 
         base.setResult(resultContent);
         base.setResultCode(ResultCode.SUCCESS.getResultCode());
@@ -134,8 +141,8 @@ public class DeviceDataController {
      */
     @RequestMapping(value = "/{logicalDeviceId}/history", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     public BaseResponse getDeviceHistoryData(@PathVariable String logicalDeviceId, @RequestParam(value = "tags") String tags, 
-    		@RequestParam("from") Long from, @RequestParam("to") Long to, 
-    		@RequestParam(value = "method", required = false) String method, @RequestParam(value = "aggregate", required = false) String aggregate) throws Exception {
+    		@RequestParam("from") Long from, @RequestParam("to") Long to, @RequestParam("method") String method, 
+    		@RequestParam("aggregate") String aggregate) throws Exception {
         return getDeviceHistoryData(logicalDeviceId, tags, from, to, method, aggregate, null);
     }
     public BaseResponse getDeviceHistoryData(String logicalDeviceId, String tags, Long from, Long to, String method, String aggregate, Boolean testFlag) throws Exception {
@@ -153,7 +160,8 @@ public class DeviceDataController {
      // user verification step
         if(testFlag == null || !testFlag) {
         	String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
-        	String userId = userService.checkValidationIdByAccessToken(accessToken);
+        	String testAccessMail = httpRequest.getHeader(ParameterName.TEST_ACCESS_FLAG);
+        	String userId = userService.checkValidationIdByAccessToken(accessToken, testAccessMail);
             if (!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
                 throw new NotRegisteredDeviceException(logicalDeviceId);
             }
@@ -166,7 +174,7 @@ public class DeviceDataController {
             reqInfo.put(InternalCommonKey.AGGREGATE, String.valueOf(aggregate));
         }
 
-        JsonObject resultContent = dataService.getDeviceInstanceHistoryData(logicalDeviceId, tagList, reqInfo);
+        JsonObject resultContent = historyReadService.getDeviceInstanceHistoryData(logicalDeviceId, tagList, reqInfo);
 
         base.setResult(resultContent);
         base.setResultCode(ResultCode.SUCCESS.getResultCode());
@@ -204,7 +212,8 @@ public class DeviceDataController {
         // user verification step
         if(testFlag == null || !testFlag) {
         	String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
-        	String userId = userService.checkValidationIdByAccessToken(accessToken);
+        	String testAccessMail = httpRequest.getHeader(ParameterName.TEST_ACCESS_FLAG);
+        	String userId = userService.checkValidationIdByAccessToken(accessToken, testAccessMail);
             if (!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
                 throw new NotRegisteredDeviceException(logicalDeviceId);
             }
@@ -213,7 +222,7 @@ public class DeviceDataController {
             reqInfo.put(InternalCommonKey.LOGICAL_DEVICE_ID, logicalDeviceId);
         }
 
-        resultContent = dataService.updateDeviceInstanceData(logicalDeviceId, content, reqInfo);
+        resultContent = dataWriteService.updateDeviceInstanceData(logicalDeviceId, content, reqInfo);
 
         BaseResponse base = new BaseResponse();
         base.setResult(resultContent);
@@ -256,7 +265,8 @@ public class DeviceDataController {
         // user verification step
         if(testFlag == null || !testFlag) {
         	String accessToken = httpRequest.getHeader(ParameterName.ACCESS_TOKEN);
-        	String userId = userService.checkValidationIdByAccessToken(accessToken);
+        	String testAccessMail = httpRequest.getHeader(ParameterName.TEST_ACCESS_FLAG);
+        	String userId = userService.checkValidationIdByAccessToken(accessToken, testAccessMail);
             if (!userDeviceRelationService.checkUserDeviceMatch(userId, logicalDeviceId)) {
                 throw new NotRegisteredDeviceException(logicalDeviceId);
             }
@@ -266,7 +276,7 @@ public class DeviceDataController {
         }
 
         // control
-        resultContent = dataService.updateDeviceInstanceData(logicalDeviceId, controlKey, content.values().iterator().next(), reqInfo);
+        resultContent = dataWriteService.updateDeviceInstanceData(logicalDeviceId, controlKey, content.values().iterator().next(), reqInfo);
 
         BaseResponse base = new BaseResponse();
         base.setResult(resultContent);

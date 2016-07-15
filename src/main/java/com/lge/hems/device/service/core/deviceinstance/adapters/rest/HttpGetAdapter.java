@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 
 import com.jayway.jsonpath.JsonPath;
 import com.lge.hems.device.exceptions.DeviceInstanceLeafInfoException;
+import com.lge.hems.device.exceptions.NullRequestException;
 import com.lge.hems.device.exceptions.RequestParameterException;
+import com.lge.hems.device.exceptions.RestRequestException;
 import com.lge.hems.device.exceptions.deviceinstance.DeviceInstanceDataReadException;
 import com.lge.hems.device.exceptions.deviceinstance.NullInstanceException;
 import com.lge.hems.device.exceptions.deviceinstance.NullLeafInformationException;
@@ -22,6 +24,9 @@ import com.lge.hems.device.utilities.CollectionFactory;
 import com.lge.hems.device.utilities.LeafUtil;
 import com.lge.hems.device.utilities.RestServiceUtil;
 import com.lge.hems.device.utilities.logger.LoggerImpl;
+
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 /**
  * Created by netsga on 2016. 6. 28..
@@ -41,9 +46,8 @@ public class HttpGetAdapter implements DeviceInstanceDataAdapter{
 
     private static final String MODULE_TYPE = "http_get";
     private static final String READ = "read";
-    private static final String HISTORY = "history";
 
-    public Map<String, Object> getDeviceInstanceData(String logicalDeviceId, Map<String, Map<String, Object>> leafDataMap, Map<String, String> requestInfo) throws NullInstanceException, DeviceInstanceDataReadException, RequestParameterException, DeviceInstanceLeafInfoException, NullLeafInformationException {
+    public Map<String, Object> getDeviceInstanceData(String logicalDeviceId, Map<String, Map<String, Object>> leafDataMap, Map<String, String> requestInfo) throws NullInstanceException, DeviceInstanceDataReadException, RequestParameterException, DeviceInstanceLeafInfoException, NullLeafInformationException, RestRequestException, NullRequestException {
         Map<String, Object> result = CollectionFactory.newMap();
 
         for(Map.Entry<String, Map<String, Object>> entry:leafDataMap.entrySet()) {
@@ -92,11 +96,11 @@ public class HttpGetAdapter implements DeviceInstanceDataAdapter{
         return result;
     }
     
-    public Map<String, Object> getDeviceInstanceHistoryData(String logicalDeviceId, Map<String, Map<String, Object>> leafDataMap, Map<String, String> requestInfo) throws NullInstanceException, DeviceInstanceDataReadException, RequestParameterException, DeviceInstanceLeafInfoException, NullLeafInformationException {
+    public Map<String, Object> getDeviceInstanceHistoryData(String logicalDeviceId, Map<String, Map<String, Object>> leafDataMap, Map<String, String> requestInfo) throws NullInstanceException, DeviceInstanceDataReadException, RequestParameterException, DeviceInstanceLeafInfoException, NullLeafInformationException, RestRequestException, NullRequestException {
         Map<String, Object> result = CollectionFactory.newMap();
 
         for(Map.Entry<String, Map<String, Object>> entry:leafDataMap.entrySet()) {
-            Map<String, String> leafData = LeafUtil.leafInfoExtractor((String) entry.getValue().get(HISTORY));
+            Map<String, String> leafData = LeafUtil.leafInfoExtractor((String) entry.getValue().get(READ));
             if(leafData.isEmpty()) {
             	throw new NullLeafInformationException("Null Leaf Information", logicalDeviceId, leafData);
             }
@@ -139,19 +143,23 @@ public class HttpGetAdapter implements DeviceInstanceDataAdapter{
                 e.setParam(requestInfo.toString());
                 throw e;
             }
-        }
-
+        }  
         return result;
     }
 
     ////////////////////////////// PRIVATE /////////////////////////////
-
-    private String requestValueFromTargetUrl(String url, String headerStr, String parseFormat, String certiKey, String password) {
+    private String requestValueFromTargetUrl(String url, String headerStr, String parseFormat, String certiKey, String password) throws RestRequestException, NullRequestException {
 
         Map.Entry<HttpStatus, String> restResp = restServiceUtil.requestGetMethod(url, headerStr, certiKey, password);
-
-        Object obj = JsonPath.read(restResp.getValue(), parseFormat);
-        return String.valueOf(obj);
+        String result;
+        
+        if("null".equals(parseFormat)) {
+        	result = restResp.getValue();
+        } else {
+        	Object obj = JsonPath.read(restResp.getValue(), parseFormat);
+       		result = obj.toString();
+        }
+        return result;
     }
 
 

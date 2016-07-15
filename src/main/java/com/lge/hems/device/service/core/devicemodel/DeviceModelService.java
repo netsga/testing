@@ -179,6 +179,7 @@ public class DeviceModelService {
         try {
             resp = cacheRepository.readAllDeviceModel();
         } catch (Exception e) {
+        	e.printStackTrace();
             throw new ModelReadFailException("Read fail to whole device model");
         }
 

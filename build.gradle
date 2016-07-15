@@ -35,7 +35,7 @@ dependencies {
     compile('com.google.code.gson:gson')
 
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.1'
-    compile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.0.0'
+    compile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.2.0'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 
     runtime('mysql:mysql-connector-java')
@@ -53,7 +53,7 @@ dependencies {
     testCompile('org.springframework.boot:spring-boot-starter-jdbc')
     testCompile('com.google.code.gson:gson')
 
-    testCompile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.0.0'
+    testCompile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.2.0'
     testCompile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
 }
 

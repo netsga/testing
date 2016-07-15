@@ -76,20 +76,24 @@ public class UserService {
 		return result;
 	}
 	
-	public String checkValidationIdByAccessToken(String token) throws Exception {
+	public String checkValidationIdByAccessToken(String token, String testEmail) throws Exception {
 		String hemsId = null;
 		String resultValid = null;
 		String thirdPartyId = null;
 		JSONParser jsonParser = new JSONParser();
 		JSONObject jsonObject = null;
 		
-		String apiUrl = THIRD_PARTY_VALIDATION_URL + "?access_token=" + token;
-		resultValid = restServiceUtil.callExternalApi(apiUrl);
-		
-		jsonObject = (JSONObject)jsonParser.parse(resultValid);
-		thirdPartyId = (String)jsonObject.get("email");
-		
-		hemsId = getUserInformation(thirdPartyId).get(0).getHemsId();
+		if(testEmail == null || testEmail.isEmpty()) {
+			String apiUrl = THIRD_PARTY_VALIDATION_URL + "?access_token=" + token;
+			resultValid = restServiceUtil.callExternalApi(apiUrl);
+			
+			jsonObject = (JSONObject)jsonParser.parse(resultValid);
+			thirdPartyId = (String)jsonObject.get("email");
+			
+			hemsId = getUserInformation(thirdPartyId).get(0).getHemsId();
+		} else {
+			hemsId = getUserInformation(testEmail).get(0).getHemsId();
+		}
 		
 		return hemsId;
 	}
