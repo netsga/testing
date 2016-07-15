@@ -53,6 +53,12 @@ public class UserService {
 		return result;
 	}
 	
+	public int updateAccessToken(String hemsId, String accessToken) {
+		int result = userDao.updateAccessToken(hemsId, accessToken);
+		
+		return result;
+	}
+	
 	public String registerDeviceMapping(String hemsId, String emSn) throws ModelReadFailException, NullModelException, DuplicateDeviceException, AddDeviceInstanceDataException, InstanceReadFailException, NullRequestException {
 		DeviceInstanceInformation gatewayInfo = new DeviceInstanceInformation();
 		String result = null;

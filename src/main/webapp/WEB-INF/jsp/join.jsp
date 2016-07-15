@@ -34,9 +34,14 @@
 		
 		var xmlhttp = new XMLHttpRequest();
 		xmlhttp.onreadystatechange = function() {
-	        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-	        	window.location.href="/join?success=true&user_id="+userInfo.userId+"&access_token="+userInfo.accessToken;
-	        }
+			if (xmlhttp.readyState == 4) {
+				if (xmlhttp.status == 200) {
+					window.location.href="/join?success=true&user_id="+userInfo.userId+"&access_token="+userInfo.accessToken;
+				} else {
+					var err = JSON.parse(xmlhttp.responseText);
+					alert(err.message);
+				}
+			}
 	    }
 		
 	    xmlhttp.open("POST", "<%=HEMS_USER_URL%>", true);

@@ -40,6 +40,15 @@ public class UserDao {
 				);
 	}
 	
+	public int updateAccessToken(String hemsId, String accessToken) {
+		String query = "UPDATE tbl_user_information SET "
+															   + "access_token = ? "
+															   + "WHERE hems_id = ?";
+		return template.update(query, accessToken,
+									  hemsId
+				);
+	}
+	
 	/*
 	public List<Mode> getModeList(String user_id) {
 		String query = "SELECT * FROM " + getPrefixDB() + "lasdb.mode_additional_data WHERE user_id=?";
