@@ -117,9 +117,8 @@ public class UserController {
 		JSONParser jsonParser = new JSONParser();
 		JSONObject jsonObject = null;
 		
-		/*
 		//Kiwigrid availability check	
-		resultAvailCheck = callGetActionToKiwigrid(KIWI_API_URL + KIWI_AVAILABILITY_CHECK_URL + "?emSN=" + userBody.getEmSN() + "&emPassword=" + userBody.getEmPassword());
+		resultAvailCheck = callGetActionToKiwigrid(KIWI_API_URL + KIWI_AVAILABILITY_CHECK_URL + "?emSN=" + userBody.getEmSN() + "&emPassword=" + userBody.getEmPassword(), null);
 		
 		jsonObject = (JSONObject)jsonParser.parse(resultAvailCheck);
 		emValidation = (boolean)jsonObject.get("result");
@@ -152,8 +151,7 @@ public class UserController {
 			//e.printStackTrace();
 			throw new Exception("An error occurs in the process of EM Binding.");
         }
-        */
-				
+        
 		//DB 저장
 		try {
 			userService.registerUser(hemsId, userBody);
@@ -174,12 +172,12 @@ public class UserController {
 		
 		return result;
 	}
-	/*
+	
 	private void callPostActionToKiwigrid(String api_url, JSONObject json) throws Exception {
 		    URL url = new URL(api_url);
 			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
-			//conn.setSSLSocketFactory(restServiceUtil.getFactory("/ad4-lg.p12", "kiwigrid"));		//AppDev
-			conn.setSSLSocketFactory(restServiceUtil.getFactory("/pilot-telstra.p12", "kiwigrid"));		//pilot-telstra
+			//conn.setSSLSocketFactory(restServiceUtil.getFactory("ad4-lg.p12", "kiwigrid"));		//AppDev
+			conn.setSSLSocketFactory(restServiceUtil.getFactory("pilot-telstra.p12", "kiwigrid"));		//pilot-telstra
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Content-Type", "application/json");
 			conn.setRequestProperty("Content-Length", "68");
@@ -203,8 +201,7 @@ public class UserController {
 		  clsOutput.close();
 		  clsInput.close();
 	}
-	*/
-
+	
 	private String callGetActionToKiwigrid(String api_url, String hemsId) {
 		String pingUrl = api_url;
 		String result = null;
@@ -214,7 +211,9 @@ public class UserController {
 			//conn.setSSLSocketFactory(restServiceUtil.getFactory("ad4-lg.p12", "kiwigrid"));		//AppDev
 			conn.setSSLSocketFactory(restServiceUtil.getFactory("pilot-telstra.p12", "kiwigrid"));		//pilot-telstra
 			conn.addRequestProperty("Content-type", "application/json;charset=utf-8");
-			conn.addRequestProperty("LG-USER-ID", hemsId);
+			if (hemsId != null) {
+				conn.addRequestProperty("LG-USER-ID", hemsId);
+			}
 			conn.addRequestProperty("Accept","application/json;charset=utf-8");
 			conn.connect();
 			InputStream in = conn.getInputStream();
