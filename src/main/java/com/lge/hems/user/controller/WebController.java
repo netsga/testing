@@ -42,7 +42,6 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 public class WebController {
 	@RequestMapping("/")
-	@ResponseBody
 	public String home(Model model){
 		model.addAttribute("name","hello springBoot");
 		return "index";
