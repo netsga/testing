@@ -74,11 +74,12 @@
 			document.location.href = '/logout';
 		}
 		
-		function callLocation()
+		function callAPI(api_type, hems_id, result_txt)
 		{
-			var txt_eng= 'result';
-			var api_url='http://localhost:8080/users/api';
+			var api_url='http://localhost:8080/users/api/' + api_type + '/' + hems_id;
 			var xmlhttp;
+			
+			document.getElementById(result_txt).innerHTML = 'loading...';
 			
 			if(window.XMLHttpRequest)
 			{
@@ -104,8 +105,21 @@
 					if (xmlhttp.status==200)
 					{
 						var user_response = JSON.parse(xmlhttp.responseText);
-						//home_id=user_response.homes[0].id;
-						document.getElementById(txt_eng).innerHTML='API Result is ' + user_response;
+						var inner_txt = '<b>guid:</b> ' + user_response.guid + '<br>'
+									  + '<b>owner:</b> ' + user_response.owner + '<br>'
+						 			  + '<b>channel:</b> ' + user_response.channel + '<br><br>';
+						if (api_type == 'location') {
+							inner_txt += '<b>PowerOutFromProducers:</b> ' + user_response.tagValues.PowerOutFromProducers.value + '<br>'
+									   + '<b>PowerConsumedFromGrid:</b> ' + user_response.tagValues.PowerConsumedFromGrid.value + '<br>'
+									   + '<b>PowerConsumedFromProducer:</b> ' + user_response.tagValues.PowerConsumedFromProducers.value + '<br>'
+									   + '<b>WorkProduced:</b> ' + user_response.tagValues.WorkProduced.value + '<br>'
+									   + '<b>StateDevice:</b> ' + user_response.tagValues.StateDevice.value + '<br>';
+						} else if (api_type == 'smartplug') {
+							inner_txt += '<b>PowerIn:</b> ' + user_response.tagValues.PowerIn.value + '<br>'
+									  + '<b>IdName:</b> ' + user_response.tagValues.IdName.value + '<br>'
+									  + '<b>StateDevice:</b> ' + user_response.tagValues.StateDevice.value + '<br>';
+						}
+						document.getElementById(result_txt).innerHTML = inner_txt;
 					}
 				}
 			}
@@ -206,12 +220,20 @@
 			</table>
 		</p>
 		
-		<p style="padding-bottom: 5px;">
-			<input type="button" class="btn" width="80px" onclick="callLocation();" value="Location call">
-			<div id="result">result ...</div>
+		<p style="padding-bottom: 5px;" width="200">
+			<table border="0" cellpadding="5" cellspacing="0">
+				<tr>
+					<td align="center"><input type="button" class="btn" width="80px" onclick="callAPI('location', '<%=hems_id%>', 'result_location');" value="Location API call"></td>
+					<td align="center"><input type="button" class="btn" width="80px" onclick="callAPI('smartplug', '<%=hems_id%>', 'result_smartplug');" value="Smart plug API call"></td>
+				</tr>
+				<tr valign="top">
+					<td width="400"><div id="result_location" align="left"></div></td>
+					<td width="400"><div id="result_smartplug" align="left"></div></td>
+				</tr>
+			</table>
 		</p>
 		
-		<p style="padding-bottom: 5px;">
+		<p style="padding-bottom: 5px;" align="right">
 			<input type="button" class="btn" width="80px" onclick="submitLogout();" value="Logout">
 		</p>
 <%

@@ -5,6 +5,8 @@ import com.lge.hems.user.model.UserlInformation;
 import com.lge.hems.user.service.core.user.*;
 import com.lge.hems.device.model.common.entity.DeviceInstanceInformation;
 import com.lge.hems.device.service.core.deviceinstance.DeviceInstanceService;
+import com.lge.hems.device.service.dao.rds.DeviceInstanceBindingRepository;
+import com.lge.hems.device.utilities.CollectionFactory;
 import com.lge.hems.device.utilities.RestServiceUtil;
 import com.lge.hems.device.utilities.logger.LoggerImpl;
 import com.lge.hems.user.service.dao.rds.UserDao;
@@ -49,6 +51,8 @@ public class UserController {
 	private UserService userService;
 	@Autowired
 	private RestServiceUtil restServiceUtil;
+	@Autowired
+    private DeviceInstanceBindingRepository bindRepository;
 	
 	//String KIWI_API_URL = "https://lgservice-lg.appdev.kiwigrid.com";		//Appdev
 	String KIWI_API_URL = "https://lgservice.telstra.hemsportal.com";		//telstra
@@ -66,23 +70,34 @@ public class UserController {
 		if (!userList.isEmpty()) {
 			userInfo = userList.get(0); 
 		}
-		
-		//1. DB 조회 User 확인
-		//2. ID 없으면 구글 실행 후 ID 등록
-		//3. ID 있으면 Token 확인, token 시간 확인
-		//4. 만료면 다시 구글 로그인. 토큰 다시 등록
-		//5. 완료되면 main
 
 		return userInfo;
 	}
 	
-	@RequestMapping(value = "/api", method = RequestMethod.GET)
-	public String callAPI() throws Exception {
-		String result = callGetActionToKiwigrid("https://lgservice.telstra.hemsportal.com/rest/deviceservice/devices/urn:kiwigrid:location:ERB04-100001182:1");
+	@RequestMapping(value = "/api/{apiType}/{hemsId}", method = RequestMethod.GET)
+	public JSONObject callAPI(@PathVariable(value = "apiType") String apiType, @PathVariable(value = "hemsId") String hemsId) throws Exception {
+		List<DeviceInstanceInformation> findResp = bindRepository.findByUserId(hemsId);
+		String deviceId = null;
+		String result = null;
+
+        for(DeviceInstanceInformation info:findResp) {
+            if(apiType.equals("location") && info.getDeviceType().equals("energy.home")) {
+            	deviceId = info.getDeviceId();
+            	continue;
+            } else if (apiType.equals("smartplug") && info.getDeviceType().equals("iot.smartplug")) {
+            	deviceId = info.getDeviceId();
+            	continue;
+            }
+        }
+        
+        result = callGetActionToKiwigrid(KIWI_API_URL + "/rest/deviceservice/devices/" + deviceId, hemsId);
+        
+		JSONParser jsonParser = new JSONParser();
+		JSONObject jsonObject = null;
 		
-		System.out.println("result:"+result);
+		jsonObject = (JSONObject)jsonParser.parse(result);
 		
-		return result;
+		return jsonObject;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -155,15 +170,11 @@ public class UserController {
 	public int updateAccessToken(@PathVariable(value = "hemsId") String hemsId, @PathVariable(value = "accessToken") String accessToken) throws Exception {
 		int result = 0;
 		
-		System.out.println("hemsId:"+hemsId);
-		System.out.println("accessToken:"+accessToken);
-		System.out.println("result1:"+result);
 		result = userService.updateAccessToken(hemsId, accessToken);
-		System.out.println("result2:"+result);
 		
 		return result;
 	}
-	
+	/*
 	private void callPostActionToKiwigrid(String api_url, JSONObject json) throws Exception {
 		    URL url = new URL(api_url);
 			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -192,8 +203,9 @@ public class UserController {
 		  clsOutput.close();
 		  clsInput.close();
 	}
+	*/
 
-	private String callGetActionToKiwigrid(String api_url) {
+	private String callGetActionToKiwigrid(String api_url, String hemsId) {
 		String pingUrl = api_url;
 		String result = null;
 		try {
@@ -202,7 +214,7 @@ public class UserController {
 			//conn.setSSLSocketFactory(restServiceUtil.getFactory("ad4-lg.p12", "kiwigrid"));		//AppDev
 			conn.setSSLSocketFactory(restServiceUtil.getFactory("pilot-telstra.p12", "kiwigrid"));		//pilot-telstra
 			conn.addRequestProperty("Content-type", "application/json;charset=utf-8");
-			conn.addRequestProperty("LG-USER-ID", "000004au1605190001042");
+			conn.addRequestProperty("LG-USER-ID", hemsId);
 			conn.addRequestProperty("Accept","application/json;charset=utf-8");
 			conn.connect();
 			InputStream in = conn.getInputStream();

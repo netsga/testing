@@ -45,7 +45,7 @@ public class WebController {
 	@ResponseBody
 	public String home(Model model){
 		model.addAttribute("name","hello springBoot");
-		return "Home";
+		return "index";
 	}
 	
 	@RequestMapping("/index")
