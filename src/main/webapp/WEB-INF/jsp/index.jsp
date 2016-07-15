@@ -62,7 +62,7 @@
 <head>
 <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
 <meta name="format-detection" content="telephone=no, address=no, email=no">
-<title>Test Google OAuth</title>
+<title>LG HEMS Pilot</title>
 <script>
 		function submitRequest()
 		{
